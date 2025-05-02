@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlantic Fluids vCard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="vcard-container">
+        <header class="vcard-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img id="user-logo" src="qt=q_95.jpg" alt="Atlantic Fluids Logo" class="logo-image">
+                </div>
+                <div class="header-text">
+                    <h1 class="personal-name" id="fullname">Loading...</h1>
+                </div>
+            </div>
+        </header>
+
+        <main class="vcard-main">
+            <div class="contact-section">
+                <div class="contact-column">
+                    <div class="contact-card email-card">
+                        <div class="card-header">
+                            <i class="fas fa-envelope contact-icon"></i>
+                            <h3 class="card-title">Email Addresses</h3>
+                        </div>
+                        <div class="contact-details" id="emails"></div>
+                    </div>
+                    
+                    <div class="contact-card phone-card">
+                        <div class="card-header">
+                            <i class="fas fa-phone contact-icon"></i>
+                            <h3 class="card-title">Phone Numbers</h3>
+                        </div>
+                        <div class="contact-details" id="phones"></div>
+                    </div>
+                </div>
+
+                <div class="contact-column">
+                    <div class="contact-card website-card">
+                        <div class="card-header">
+                            <i class="fas fa-globe contact-icon"></i>
+                            <h3 class="card-title">Website</h3>
+                        </div>
+                        <div class="contact-details">
+                            <a id="website" href="#" target="_blank" class="website-link">...</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card address-card">
+                        <div class="card-header">
+                            <i class="fas fa-map-marker-alt contact-icon"></i>
+                            <h3 class="card-title">Address</h3>
+                        </div>
+                        <div class="contact-details">
+                            <span id="address" class="address-text">...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="social-links" id="social-links"></div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXCsqN-xwQ-3_bt2dTaxbmywSW002zOW4",
+            authDomain: "atlantic-fluids.firebaseapp.com",
+            projectId: "atlantic-fluids",
+            storageBucket: "atlantic-fluids.appspot.com",
+            messagingSenderId: "92805829518",
+            appId: "1:92805829518:web:4aadfe255fd9bdc2348adf"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id') || 'default';
+
+        db.collection("contacts").doc(userId).get()
+            .then((doc) => {
+                if (doc.exists) {
+                    const user = doc.data();
+                    updateUI(user);
+                } else {
+                    showError("User not found! Check the ID in the URL");
+                }
+            })
+            .catch((error) => {
+                showError("Error loading data: " + error.message);
+            });
+
+        function updateUI(user) {
+            document.getElementById('fullname').textContent = user.fullname || 'No Name Provided';
+            
+            // Website
+            const websiteElement = document.getElementById('website');
+            websiteElement.href = user.website || '#';
+            websiteElement.textContent = user.website ? 
+                new URL(user.website).hostname.replace('www.', '') : 
+                'No Website';
+
+            // Address
+            document.getElementById('address').innerHTML = user.address?.replace(/\n/g, '<br>') || 'No Address Provided';
+
+            // Emails
+            const emailsContainer = document.getElementById('emails');
+            if (user.emails?.length) {
+                emailsContainer.innerHTML = user.emails.map(email => `
+                    <div class="contact-item">
+                        <a href="mailto:${email}" class="contact-link">
+                            ${email}
+                            <i class="fas fa-external-link-alt link-icon"></i>
+                        </a>
+                    </div>
+                `).join('');
+            } else {
+                emailsContainer.innerHTML = '<div class="no-data">No emails available</div>';
+            }
+
+            // Phones
+            const phonesContainer = document.getElementById('phones');
+            if (user.phones?.length) {
+                phonesContainer.innerHTML = user.phones.map(phone => `
+                    <div class="contact-item">
+                        <a href="tel:${phone}" class="contact-link">
+                            ${formatPhoneNumber(phone)}
+                            <i class="fas fa-phone-alt link-icon"></i>
+                        </a>
+                    </div>
+                `).join('');
+            } else {
+                phonesContainer.innerHTML = '<div class="no-data">No phone numbers available</div>';
+            }
+
+            // Social Links
+            const socialLinks = document.getElementById('social-links');
+            socialLinks.innerHTML = '';
+            if (user.social) {
+                if (user.social.facebook) addSocialLink(socialLinks, 'facebook', user.social.facebook);
+                if (user.social.twitter) addSocialLink(socialLinks, 'twitter', user.social.twitter);
+                if (user.social.linkedin) addSocialLink(socialLinks, 'linkedin', user.social.linkedin);
+            }
+
+            // Update logo
+            if (user.logo) {
+                document.getElementById('user-logo').src = user.logo;
+            }
+        }
+
+        function formatPhoneNumber(phone) {
+            return phone.replace(/(\+\d{3})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+        }
+
+        function addSocialLink(container, platform, url) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.className = 'social-link';
+            link.target = '_blank';
+            link.innerHTML = `<i class="fab fa-${platform}"></i>`;
+            container.appendChild(link);
+        }
+
+        function showError(message) {
+            document.querySelector('.vcard-container').innerHTML = `
+                <div class="error">${message}</div>
+            `;
+        }
+    </script>
+</body>
+</html>
