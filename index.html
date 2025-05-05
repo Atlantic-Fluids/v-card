@@ -2,68 +2,327 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlantic Fluids vCard</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Atlantic Fluids | Responsive Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0066CC;
+            --secondary: #004799;
+            --background: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text: #1E293B;
+            --border: #E2E8F0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .vcard-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 1200px;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin: 1rem;
+        }
+
+        /* Header Section */
+        .header-section {
+            padding: clamp(2rem, 5vw, 4rem) 1rem;
+            background: var(--primary);
+            text-align: center;
+            position: relative;
+        }
+
+        .company-logo {
+            width: clamp(100px, 25vw, 160px);
+            height: clamp(100px, 25vw, 160px);
+            margin: 0 auto 1.5rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .company-name {
+            color: var(--card-bg);
+            font-size: clamp(1.75rem, 6vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            padding: 0 1rem;
+            word-wrap: break-word;
+        }
+
+        /* Main Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: 1.5rem;
+            padding: clamp(1.5rem, 3vw, 3rem);
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: clamp(1rem, 2vw, 2rem);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-icon {
+            width: clamp(36px, 8vw, 48px);
+            height: clamp(36px, 8vw, 48px);
+            background: var(--primary);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: clamp(1.1rem, 3vw, 1.25rem);
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-item {
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+            min-height: 56px;
+        }
+
+        .contact-link {
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .contact-link i {
+            color: var(--primary);
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            min-width: 24px;
+        }
+
+        .social-section {
+            padding: clamp(1rem, 2vw, 2rem);
+            background: var(--background);
+            border-top: 1px solid var(--border);
+        }
+
+        .social-grid {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .social-item {
+            padding: 0.75rem 1.25rem;
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            flex: 1 1 auto;
+            min-width: 160px;
+            max-width: 240px;
+            justify-content: center;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .content-grid {
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+
+            .card-header {
+                gap: 0.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .contact-item {
+                padding: 0.5rem;
+                min-height: 48px;
+            }
+
+            .social-item {
+                min-width: 140px;
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .vcard-container {
+                border-radius: 1rem;
+                margin: 0.5rem;
+            }
+
+            .header-section {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .content-grid {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+
+            .info-card {
+                padding: 1rem;
+                border-radius: 0.75rem;
+            }
+
+            .card-header {
+                padding-bottom: 0.75rem;
+            }
+
+            .social-item {
+                width: 100%;
+                max-width: 100%;
+                min-width: unset;
+            }
+
+            .contact-link span {
+                word-break: break-all;
+            }
+        }
+
+        @media (hover: hover) {
+            .contact-item:hover {
+                transform: translateX(8px);
+                box-shadow: var(--shadow);
+            }
+
+            .social-item:hover {
+                background: var(--primary);
+                color: white;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="vcard-container">
-        <header class="vcard-header">
-            <div class="header-content">
-                <div class="logo-container">
-                    <img id="user-logo" src="qt=q_95.jpg" alt="Atlantic Fluids Logo" class="logo-image">
-                </div>
-                <div class="header-text">
-                    <h1 class="personal-name" id="fullname">Loading...</h1>
-                </div>
+        <header class="header-section">
+            <div class="company-logo">
+                <img src="qt=q_95.jpg" alt="Atlantic Fluids Logo">
             </div>
+            <h1 class="company-name" id="fullname">Atlantic Fluids</h1>
         </header>
 
-        <main class="vcard-main">
-            <div class="contact-section">
-                <div class="contact-column">
-                    <div class="contact-card email-card">
-                        <div class="card-header">
-                            <i class="fas fa-envelope contact-icon"></i>
-                            <h3 class="card-title">Email Addresses</h3>
+        <main>
+            <div class="content-grid">
+                <!-- Contact Cards -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-envelope"></i>
                         </div>
-                        <div class="contact-details" id="emails"></div>
+                        <h2 class="card-title">Email Addresses</h2>
                     </div>
-                    
-                    <div class="contact-card phone-card">
-                        <div class="card-header">
-                            <i class="fas fa-phone contact-icon"></i>
-                            <h3 class="card-title">Phone Numbers</h3>
+                    <div class="card-content" id="emails"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-phone"></i>
                         </div>
-                        <div class="contact-details" id="phones"></div>
+                        <h2 class="card-title">Phone Numbers</h2>
+                    </div>
+                    <div class="card-content" id="phones"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h2 class="card-title">Website</h2>
+                    </div>
+                    <div class="card-content">
+                        <a id="website" href="#" class="contact-item contact-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>Loading website...</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="contact-column">
-                    <div class="contact-card website-card">
-                        <div class="card-header">
-                            <i class="fas fa-globe contact-icon"></i>
-                            <h3 class="card-title">Website</h3>
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        <div class="contact-details">
-                            <a id="website" href="#" target="_blank" class="website-link">...</a>
-                        </div>
+                        <h2 class="card-title">Address</h2>
                     </div>
-                    
-                    <div class="contact-card address-card">
-                        <div class="card-header">
-                            <i class="fas fa-map-marker-alt contact-icon"></i>
-                            <h3 class="card-title">Address</h3>
-                        </div>
-                        <div class="contact-details">
-                            <span id="address" class="address-text">...</span>
+                    <div class="card-content">
+                        <div id="address" class="contact-item">
+                            <i class="fas fa-building"></i>
+                            <span>Loading address...</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="social-links" id="social-links"></div>
+            <div class="social-section">
+                <div class="social-grid" id="social-links"></div>
+            </div>
         </main>
     </div>
 
@@ -91,88 +350,118 @@
                     const user = doc.data();
                     updateUI(user);
                 } else {
-                    showError("User not found! Check the ID in the URL");
+                    showError("Profile not found. Please check the ID");
                 }
             })
             .catch((error) => {
-                showError("Error loading data: " + error.message);
+                showError("Failed to load data: " + error.message);
             });
 
         function updateUI(user) {
-            document.getElementById('fullname').textContent = user.fullname || 'No Name Provided';
-            
-            // Website
+            // Update Company Name
+            document.getElementById('fullname').textContent = user.fullname || 'Atlantic Fluids';
+
+            // Update Website
             const websiteElement = document.getElementById('website');
-            websiteElement.href = user.website || '#';
-            websiteElement.textContent = user.website ? 
-                new URL(user.website).hostname.replace('www.', '') : 
-                'No Website';
-
-            // Address
-            document.getElementById('address').innerHTML = user.address?.replace(/\n/g, '<br>') || 'No Address Provided';
-
-            // Emails
-            const emailsContainer = document.getElementById('emails');
-            if (user.emails?.length) {
-                emailsContainer.innerHTML = user.emails.map(email => `
-                    <div class="contact-item">
-                        <a href="mailto:${email}" class="contact-link">
-                            ${email}
-                            <i class="fas fa-external-link-alt link-icon"></i>
-                        </a>
-                    </div>
-                `).join('');
+            if (user.website) {
+                websiteElement.href = user.website;
+                websiteElement.querySelector('span').textContent = 
+                    new URL(user.website).hostname.replace('www.', '');
             } else {
-                emailsContainer.innerHTML = '<div class="no-data">No emails available</div>';
+                websiteElement.querySelector('span').textContent = 'No website available';
+                websiteElement.removeAttribute('href');
             }
 
-            // Phones
-            const phonesContainer = document.getElementById('phones');
-            if (user.phones?.length) {
-                phonesContainer.innerHTML = user.phones.map(phone => `
-                    <div class="contact-item">
-                        <a href="tel:${phone}" class="contact-link">
-                            ${formatPhoneNumber(phone)}
-                            <i class="fas fa-phone-alt link-icon"></i>
-                        </a>
-                    </div>
-                `).join('');
+            // Update Address
+            const addressElement = document.getElementById('address');
+            if (user.address) {
+                addressElement.querySelector('span').innerHTML = 
+                    user.address.replace(/\n/g, '<br>');
             } else {
-                phonesContainer.innerHTML = '<div class="no-data">No phone numbers available</div>';
+                addressElement.querySelector('span').textContent = 'Address not available';
             }
 
-            // Social Links
-            const socialLinks = document.getElementById('social-links');
-            socialLinks.innerHTML = '';
-            if (user.social) {
-                if (user.social.facebook) addSocialLink(socialLinks, 'facebook', user.social.facebook);
-                if (user.social.twitter) addSocialLink(socialLinks, 'twitter', user.social.twitter);
-                if (user.social.linkedin) addSocialLink(socialLinks, 'linkedin', user.social.linkedin);
-            }
+            // Update Contact Lists
+            populateContactList('emails', user.emails, 'envelope', 'mailto:');
+            populateContactList('phones', user.phones, 'phone', 'tel:');
+            populateSocialLinks(user.social);
+        }
 
-            // Update logo
-            if (user.logo) {
-                document.getElementById('user-logo').src = user.logo;
+        function populateContactList(containerId, items, icon, prefix) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (items && items.length) {
+                items.forEach(item => {
+                    const element = document.createElement('a');
+                    element.className = 'contact-item contact-link';
+                    element.href = `${prefix}${item}`;
+                    element.innerHTML = `
+                        <i class="fas fa-${icon}"></i>
+                        <span>${icon === 'phone' ? formatPhone(item) : item}</span>
+                    `;
+                    container.appendChild(element);
+                });
+            } else {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'contact-item';
+                emptyState.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <span>No ${containerId} available</span>
+                `;
+                container.appendChild(emptyState);
             }
         }
 
-        function formatPhoneNumber(phone) {
-            return phone.replace(/(\+\d{3})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+        function populateSocialLinks(social) {
+            const container = document.getElementById('social-links');
+            container.innerHTML = '';
+            
+            const platforms = [
+                { name: 'facebook', icon: 'facebook-f' },
+                { name: 'twitter', icon: 'twitter' },
+                { name: 'linkedin', icon: 'linkedin-in' },
+                { name: 'instagram', icon: 'instagram' }
+            ];
+
+            platforms.forEach(platform => {
+                if (social?.[platform.name]) {
+                    const link = document.createElement('a');
+                    link.className = 'social-item';
+                    link.href = social[platform.name];
+                    link.target = '_blank';
+                    link.innerHTML = `
+                        <i class="fab fa-${platform.icon}"></i>
+                        <span>${platform.name.charAt(0).toUpperCase() + platform.name.slice(1)}</span>
+                    `;
+                    container.appendChild(link);
+                }
+            });
+
+            if (container.children.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'social-item';
+                emptyState.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <span>No social links available</span>
+                `;
+                container.appendChild(emptyState);
+            }
         }
 
-        function addSocialLink(container, platform, url) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.className = 'social-link';
-            link.target = '_blank';
-            link.innerHTML = `<i class="fab fa-${platform}"></i>`;
-            container.appendChild(link);
+        function formatPhone(phone) {
+            return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
         }
 
         function showError(message) {
-            document.querySelector('.vcard-container').innerHTML = `
-                <div class="error">${message}</div>
+            const container = document.createElement('div');
+            container.className = 'error-container';
+            container.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>${message}</h3>
+                <p>Please try again later or contact support</p>
             `;
+            document.querySelector('main').prepend(container);
         }
     </script>
 </body>
