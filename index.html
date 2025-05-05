@@ -186,6 +186,20 @@
             justify-content: center;
         }
 
+        .error-container {
+            padding: 2rem;
+            text-align: center;
+            color: #dc3545;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .error-container i {
+            font-size: 3rem;
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .content-grid {
@@ -260,10 +274,10 @@
 <body>
     <div class="vcard-container">
         <header class="header-section">
-            <div class="company-logo">
-                <img src="qt=q_95.jpg" alt="Atlantic Fluids Logo">
+            <div class="company-logo" id="companyLogo">
+                <img src="logo1.jpg" alt="Atlantic Fluids Logo">
             </div>
-            <h1 class="company-name" id="fullname">Atlantic Fluids</h1>
+            <h1 class="company-name" id="fullName">Atlantic Fluids</h1>
         </header>
 
         <main>
@@ -329,6 +343,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script>
+        // Firebase configuration and initialization
         const firebaseConfig = {
             apiKey: "AIzaSyCXCsqN-xwQ-3_bt2dTaxbmywSW002zOW4",
             authDomain: "atlantic-fluids.firebaseapp.com",
@@ -341,82 +356,127 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Get profile ID from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('id') || 'default';
+        const profileId = urlParams.get('id');
 
-        db.collection("contacts").doc(userId).get()
-            .then((doc) => {
-                if (doc.exists) {
-                    const user = doc.data();
-                    updateUI(user);
-                } else {
-                    showError("Profile not found. Please check the ID");
+        if (!profileId) {
+            showError("No profile ID provided in URL");
+        } else {
+            loadProfile(profileId);
+        }
+
+        async function loadProfile(profileId) {
+            try {
+                const doc = await db.collection("contacts").doc(profileId).get();
+                
+                if (!doc.exists) {
+                    showError("Profile not found");
+                    return;
                 }
-            })
-            .catch((error) => {
-                showError("Failed to load data: " + error.message);
-            });
 
-        function updateUI(user) {
-            // Update Company Name
-            document.getElementById('fullname').textContent = user.fullname || 'Atlantic Fluids';
+                const profile = doc.data();
+                console.log("Loaded profile data:", profile); // For debugging
+                updateUI(profile);
+            } catch (error) {
+                showError(`Failed to load profile: ${error.message}`);
+                console.error("Error loading profile:", error);
+            }
+        }
 
-            // Update Website
+        function updateUI(profile) {
+            // Update basic information
+            document.getElementById('fullName').textContent = profile.fullname || profile.fullName || 'Atlantic Fluids';
+            updateLogo(profile.logo || profile.companyLogo);
+            updateWebsite(profile.website);
+            updateAddress(profile.address);
+            updateContacts(profile);
+            updateSocialLinks(profile.social);
+        }
+
+        function updateLogo(logoPath) {
+            const logoImg = document.querySelector('#companyLogo img');
+            if (logoPath && typeof logoPath === 'string') {
+                logoImg.src = logoPath;
+            }
+        }
+
+        function updateWebsite(websiteUrl) {
             const websiteElement = document.getElementById('website');
-            if (user.website) {
-                websiteElement.href = user.website;
+            if (websiteUrl && isValidUrl(websiteUrl)) {
+                websiteElement.href = websiteUrl;
                 websiteElement.querySelector('span').textContent = 
-                    new URL(user.website).hostname.replace('www.', '');
+                    new URL(websiteUrl).hostname.replace('www.', '');
             } else {
-                websiteElement.querySelector('span').textContent = 'No website available';
+                websiteElement.querySelector('span').textContent = 'Website not available';
                 websiteElement.removeAttribute('href');
             }
+        }
 
-            // Update Address
+        function updateAddress(address) {
             const addressElement = document.getElementById('address');
-            if (user.address) {
+            if (address && typeof address === 'string') {
                 addressElement.querySelector('span').innerHTML = 
-                    user.address.replace(/\n/g, '<br>');
+                    address.replace(/\n/g, '<br>');
             } else {
                 addressElement.querySelector('span').textContent = 'Address not available';
             }
-
-            // Update Contact Lists
-            populateContactList('emails', user.emails, 'envelope', 'mailto:');
-            populateContactList('phones', user.phones, 'phone', 'tel:');
-            populateSocialLinks(user.social);
         }
 
-        function populateContactList(containerId, items, icon, prefix) {
+        function updateContacts(profile) {
+            populateContactList('emails', profile.emails, 'envelope', 'mailto:');
+            populateContactList('phones', profile.phones, 'phone', 'tel:');
+        }
+
+        function populateContactList(containerId, items, iconType, prefix) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-            
-            if (items && items.length) {
+
+            if (Array.isArray(items) && items.length > 0) {
                 items.forEach(item => {
-                    const element = document.createElement('a');
-                    element.className = 'contact-item contact-link';
-                    element.href = `${prefix}${item}`;
-                    element.innerHTML = `
-                        <i class="fas fa-${icon}"></i>
-                        <span>${icon === 'phone' ? formatPhone(item) : item}</span>
-                    `;
+                    const element = createContactElement(item, iconType, prefix);
                     container.appendChild(element);
                 });
-            } else {
-                const emptyState = document.createElement('div');
-                emptyState.className = 'contact-item';
-                emptyState.innerHTML = `
-                    <i class="fas fa-info-circle"></i>
-                    <span>No ${containerId} available</span>
-                `;
-                container.appendChild(emptyState);
+            }
+
+            if (container.children.length === 0) {
+                container.appendChild(createEmptyState(containerId));
             }
         }
 
-        function populateSocialLinks(social) {
+        function createContactElement(value, icon, prefix) {
+            const element = document.createElement('a');
+            element.className = 'contact-item contact-link';
+            element.href = `${prefix}${value}`;
+            element.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${icon === 'phone' ? formatPhone(value) : value}</span>
+            `;
+            return element;
+        }
+
+        function createEmptyState(type) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'contact-item';
+            emptyState.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <span>No ${type} available</span>
+            `;
+            return emptyState;
+        }
+
+        function updateSocialLinks(socialData) {
             const container = document.getElementById('social-links');
             container.innerHTML = '';
-            
+
+            if (socialData && typeof socialData === 'object' && Object.keys(socialData).length > 0) {
+                createSocialLinks(container, socialData);
+            } else {
+                container.appendChild(createSocialEmptyState());
+            }
+        }
+
+        function createSocialLinks(container, socialData) {
             const platforms = [
                 { name: 'facebook', icon: 'facebook-f' },
                 { name: 'twitter', icon: 'twitter' },
@@ -425,43 +485,74 @@
             ];
 
             platforms.forEach(platform => {
-                if (social?.[platform.name]) {
-                    const link = document.createElement('a');
-                    link.className = 'social-item';
-                    link.href = social[platform.name];
-                    link.target = '_blank';
-                    link.innerHTML = `
-                        <i class="fab fa-${platform.icon}"></i>
-                        <span>${platform.name.charAt(0).toUpperCase() + platform.name.slice(1)}</span>
-                    `;
+                if (socialData[platform.name] && isValidUrl(socialData[platform.name])) {
+                    const link = createSocialLink(platform, socialData[platform.name]);
                     container.appendChild(link);
                 }
             });
 
             if (container.children.length === 0) {
-                const emptyState = document.createElement('div');
-                emptyState.className = 'social-item';
-                emptyState.innerHTML = `
-                    <i class="fas fa-info-circle"></i>
-                    <span>No social links available</span>
-                `;
-                container.appendChild(emptyState);
+                container.appendChild(createSocialEmptyState());
             }
         }
 
+        function createSocialLink(platform, url) {
+            const link = document.createElement('a');
+            link.className = 'social-item';
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.innerHTML = `
+                <i class="fab fa-${platform.icon}"></i>
+                <span>${platform.name.charAt(0).toUpperCase() + platform.name.slice(1)}</span>
+            `;
+            return link;
+        }
+
+        function createSocialEmptyState() {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'social-item';
+            emptyState.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <span>No social links available</span>
+            `;
+            return emptyState;
+        }
+
         function formatPhone(phone) {
-            return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            // Check if phone is already formatted
+            if (phone.includes('-') || phone.includes(' ') || phone.includes('(')) {
+                return phone;
+            }
+            
+            // Simple formatting for numbers
+            const cleaned = phone.replace(/\D/g, '');
+            if (cleaned.length === 10) {
+                return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+            } else {
+                return phone;
+            }
+        }
+
+        function isValidUrl(url) {
+            try {
+                new URL(url);
+                return true;
+            } catch {
+                return false;
+            }
         }
 
         function showError(message) {
-            const container = document.createElement('div');
-            container.className = 'error-container';
-            container.innerHTML = `
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>${message}</h3>
-                <p>Please try again later or contact support</p>
+            const main = document.querySelector('main');
+            main.innerHTML = `
+                <div class="error-container">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <p>Please check the URL or try again later</p>
+                </div>
             `;
-            document.querySelector('main').prepend(container);
+            console.error(message);
         }
     </script>
 </body>
